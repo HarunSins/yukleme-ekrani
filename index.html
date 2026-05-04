@@ -7,108 +7,80 @@
             margin: 0; padding: 0;
             background: #000 url('favela-yukleme-arkaplan.png') no-repeat center center fixed; 
             background-size: cover;
-            /* Fontu senin istediğin o ince/şık tarza çektim */
+            /* İstediğin o şık ve ince font */
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             overflow: hidden; color: white;
             display: flex; justify-content: center; align-items: center;
             height: 100vh;
         }
 
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+            z-index: 1;
+        }
+
         .main-container {
-            width: 80%;
-            max-width: 900px;
-            text-align: center;
-            /* Barı logonun tam altına hizalamak için aşağı kaydırdık */
-            margin-top: 200px; 
+            position: relative; z-index: 2; text-align: center;
+            margin-top: 180px; /* Logonun altına gelmesi için */
         }
 
-        /* Barın üstündeki dosya durum yazısı */
-        #file-status {
-            font-size: 13px; 
-            color: #ffffff; 
+        /* Bloom Efektli Parlayan Yazı */
+        #status {
+            font-size: 28px; 
+            font-weight: 200; /* İnce ve elit görünüm */
+            letter-spacing: 8px; 
+            color: #ff0000;
             text-transform: uppercase;
-            margin-bottom: 10px; 
-            letter-spacing: 2px;
-            text-shadow: 1px 1px 3px #000;
+            /* Kırmızı Bloom (Parlama) Efekti */
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #800000, 0 0 30px #000;
+            animation: pulse 2s infinite ease-in-out;
         }
 
-        /* İstediğin o uzun ve parlayan bar tasarımı */
-        .progress-wrapper {
-            width: 100%; 
-            height: 12px; 
-            background: rgba(0,0,0,0.8);
-            border-radius: 10px; 
-            border: 1px solid #333; 
-            overflow: hidden;
-        }
-
-        #progress-inner {
-            width: 0%; /* Başlangıç sıfır */
-            height: 100%;
-            background: linear-gradient(90deg, #800000, #ff0000);
-            box-shadow: 0 0 15px #ff0000;
-            /* Akıcı dolma efekti */
-            transition: width 0.4s ease-out; 
-        }
-
-        /* Alt taraftaki marka yazısı */
-        #loading-text {
-            margin-top: 15px; 
-            font-size: 14px; 
-            color: #fff; 
+        /* Alttaki küçük bilgilendirme yazısı */
+        #sub-text {
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
             letter-spacing: 4px;
-            text-shadow: 1px 1px 4px #000;
-            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        /* Hafif nefes alma animasyonu (Parlama için) */
+        @keyframes pulse {
+            0% { opacity: 0.8; text-shadow: 0 0 10px #ff0000; }
+            50% { opacity: 1; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; }
+            100% { opacity: 0.8; text-shadow: 0 0 10px #ff0000; }
         }
     </style>
 </head>
 <body>
+    <div class="overlay"></div>
+    
     <div class="main-container">
-        <!-- Dosya durumu burada yazacak (Lua Started, Download vs.) -->
-        <div id="file-status">SUNUCUYA BAĞLANILIYOR...</div>
-
-        <!-- Uzun Bar -->
-        <div class="progress-wrapper">
-            <div id="progress-inner"></div>
-        </div>
-        
-        <!-- Alt Metin -->
-        <div id="loading-text">FAVELA-CITY ROLEPLAY</div>
+        <!-- Parlayan Ana Yazı -->
+        <div id="status">SUNUCUYA BAĞLANILIYOR</div>
+        <!-- Alttaki Sabit Yazı -->
+        <div id="sub-text">FAVELA-CITY ROLEPLAY</div>
     </div>
 
     <script type="text/javascript">
-        // GMOD'da barın çalışması için EN GARANTİ YÖNTEM:
-        var total = 0;
-        var needed = 0;
-
-        // GMOD dosyaları saymaya başladığında bu çalışır
-        function SetFilesNeeded(val) {
-            needed = val;
-            total = val;
-        }
-
-        // Dosyalar indikçe bu çalışır
-        function SetFilesRemaining(val) {
-            if (total <= 0) return; // Toplam dosya gelmediyse işlem yapma
-
-            var remaining = val;
-            var progress = ((total - remaining) / total) * 100;
-            
-            // Barı güncelle
-            document.getElementById('progress-inner').style.width = progress + '%';
-        }
-
-        // Yazıları günceller
-        function SetStatusChanged(status) {
-            document.getElementById('file-status').innerHTML = status;
-        }
-
-        // Alt metin nokta animasyonu (donma olmadığını göstermek için)
         var dots = 0;
+        var baseText = "SUNUCUYA BAĞLANILIYOR";
+
+        // Noktaların loopta dönmesi için (Bağlanılıyor., .., ...)
         setInterval(function() {
-            dots = (dots + 1) % 4;
-            document.getElementById('loading-text').innerHTML = "FAVELA-CITY ROLEPLAY" + ".".repeat(dots);
+            dots++;
+            if (dots > 3) dots = 0;
+            document.getElementById('status').innerHTML = baseText + ".".repeat(dots);
         }, 600);
+
+        // GMOD'dan gelen teknik yazıları (Lua started vs.) 
+        // ana parlayan yazının altında küçükçe göstermek istersen:
+        function SetStatusChanged(status) {
+            // Eğer istersen teknik detaylar sub-text kısmında akabilir
+            // document.getElementById('sub-text').innerHTML = status;
+        }
     </script>
 </body>
 </html>
