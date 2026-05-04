@@ -7,124 +7,122 @@
             margin: 0; padding: 0;
             background: #000 url('favela-yukleme-arkaplan.png') no-repeat center center fixed; 
             background-size: cover;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             overflow: hidden; color: white;
             display: flex; justify-content: center; align-items: center;
             height: 100vh;
         }
 
-        /* Bloom ve Karartma Paneli */
-        .overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
-            z-index: 1;
-        }
-
         .main-container {
-            position: relative; z-index: 2; width: 50%; text-align: center;
+            width: 500px; text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 25px; border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,0,0,0.2);
+            margin-top: 100px;
         }
 
-        /* Oyuncu Bilgi Alanı */
-        .player-info {
-            display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
-            animation: fadeIn 2s ease-in-out;
+        /* Oyuncu Kısmı */
+        .player-box {
+            display: flex; align-items: center; justify-content: center; margin-bottom: 15px;
         }
         #avatar {
-            width: 64px; height: 64px; border-radius: 50%;
-            border: 3px solid #ff0000; box-shadow: 0 0 15px #ff0000;
-            margin-right: 15px;
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid #ff0000; box-shadow: 0 0 10px #ff0000;
+            margin-right: 12px; background-color: #222;
         }
-        .welcome-text {
-            text-align: left; text-shadow: 2px 2px 5px #000;
-        }
-        #username { font-size: 24px; font-weight: bold; color: #ff0000; }
+        .name-tag { text-align: left; line-height: 1.2; }
+        #username { font-size: 20px; font-weight: bold; color: #ff0000; text-transform: uppercase; }
 
-        /* Parlayan Yükleme Barı (Bloom Effect) */
-        .progress-wrapper {
-            width: 100%; background: rgba(0,0,0,0.8);
-            padding: 5px; border-radius: 50px; border: 1px solid #333;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        /* Dosya Yükleme Yazısı (Barın Üstünde Küçük) */
+        #file-status {
+            font-size: 11px; color: #aaa; text-transform: uppercase;
+            margin-bottom: 5px; letter-spacing: 1px; height: 14px;
         }
-        .progress-bar-bg {
-            width: 100%; height: 15px; background: #111; border-radius: 50px; overflow: hidden;
+
+        /* Modern Parlayan Bar */
+        .progress-wrapper {
+            width: 100%; height: 12px; background: #111;
+            border-radius: 10px; border: 1px solid #333; overflow: hidden;
+            box-shadow: inset 0 0 5px #000;
         }
         #progress-inner {
             width: 0%; height: 100%;
-            background: linear-gradient(90deg, #660000, #ff0000, #ff4d4d);
-            box-shadow: 0 0 20px #ff0000, 0 0 40px #800000; /* Bloom etkisi burası */
-            border-radius: 50px; transition: width 0.4s ease;
+            background: linear-gradient(90deg, #800000, #ff0000);
+            box-shadow: 0 0 15px #ff0000;
+            transition: width 0.2s ease-out;
         }
 
-        /* Hareketli Yazı (Loopta dönen noktalar) */
-        #status {
-            margin-top: 15px; font-size: 16px; font-weight: 300;
-            letter-spacing: 2px; color: #eee; text-transform: uppercase;
+        /* Sabit Durum Yazısı (Barın Altında) */
+        #loading-text {
+            margin-top: 10px; font-size: 13px; font-weight: bold;
+            color: #eee; letter-spacing: 2px;
         }
-
-        /* Sağ Altta Akıcı Dosya Yazısı */
-        #file-list {
-            position: fixed; bottom: 20px; right: 20px;
-            font-size: 11px; color: rgba(255,255,255,0.4);
-            text-align: right; max-width: 300px;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
-    
     <div class="main-container">
-        <div class="player-info">
+        <!-- Oyuncu Bilgisi -->
+        <div class="player-box">
             <img id="avatar" src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg">
-            <div class="welcome-text">
-                <div>HOŞ GELDİN,</div>
-                <div id="username">OYUNCU</div>
+            <div class="name-tag">
+                <div style="font-size: 10px; color: #ccc;">HOŞ GELDİN,</div>
+                <div id="username">YÜKLENİYOR...</div>
             </div>
         </div>
 
+        <!-- Dosya Yazısı -->
+        <div id="file-status">SUNUCU VERİLERİ OKUNUYOR</div>
+
+        <!-- Bar -->
         <div class="progress-wrapper">
-            <div class="progress-bar-bg">
-                <div id="progress-inner"></div>
-            </div>
+            <div id="progress-inner"></div>
         </div>
         
-        <div id="status">SUNUCUYA BAĞLANILIYOR</div>
+        <!-- Alt Sabit Yazı -->
+        <div id="loading-text">SUNUCUYA BAĞLANILAMAYOR...</div>
     </div>
 
-    <div id="file-list">HAZIRLANIYOR...</div>
-
     <script type="text/javascript">
-        var totalFiles = 100;
+        var totalFiles = 0;
+        var filesLeft = 0;
+
+        // GMOD'un ana veri fonksiyonu (İsim ve Avatar için)
+        function GameDetails( servername, serverurl, mapname, maxplayers, steamid, gamemode ) {
+            // GMOD %s parametresinden steamid geldiğinde ismi çekmeyi dener
+            // Not: Web ortamında gerçek ismi çekmek için Steam API gerekir ancak
+            // GMOD bunu yerel olarak hallederse 'steamid' kısmını buraya yazar.
+            document.getElementById('username').innerHTML = "OYUNCU"; 
+        }
+
+        // Dosya sayısı geldiğinde
+        function SetFilesNeeded( needed ) {
+            totalFiles = needed;
+        }
+
+        // Kalan dosya sayısı güncellendikçe barı doldur
+        function SetFilesRemaining( remaining ) {
+            filesLeft = remaining;
+            var progress = ((totalFiles - filesLeft) / totalFiles) * 100;
+            
+            // Barı doldur
+            if (progress > 0) {
+                document.getElementById('progress-inner').style.width = progress + '%';
+            }
+        }
+
+        // Lua/Dosya durumları değiştikçe barın üstündeki küçük yazıyı güncelle
+        function SetStatusChanged( status ) {
+            document.getElementById('file-status').innerHTML = status;
+        }
+
+        // Alt taraftaki "Bağlanılıyor..." yazısının loop animasyonu
         var dots = 0;
-
-        // Noktaların loopta dönmesi için animasyon
         setInterval(function() {
-            dots++;
-            if (dots > 3) dots = 0;
-            var dotStr = ".".repeat(dots);
-            var currentStatus = document.getElementById('status').innerHTML.replace(/\./g, '');
-            document.getElementById('status').innerHTML = currentStatus + dotStr;
+            dots = (dots + 1) % 4;
+            var d = ".".repeat(dots);
+            document.getElementById('loading-text').innerHTML = "SUNUCUYA BAĞLANILIYOR" + d;
         }, 500);
-
-        // GMOD Veri Fonksiyonları
-        function SetFilesNeeded(needed) { totalFiles = Math.max(1, needed); }
-        
-        function SetFilesRemaining(remaining) {
-            var progress = ((totalFiles - remaining) / totalFiles) * 100;
-            document.getElementById('progress-inner').style.width = progress + '%';
-        }
-
-        function SetStatusChanged(status) {
-            document.getElementById('status').innerHTML = status;
-            document.getElementById('file-list').innerHTML = status;
-        }
-
-        // Steam ID ve Bilgilerini Çekme denemesi (URL'den gelir)
-        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-            // Steam ID üzerinden avatar çekmek için bir API gerekebilir ancak basitçe ID'yi gösterebiliriz
-            document.getElementById('file-list').innerHTML = "Harita: " + mapname + " | Mod: " + gamemode;
-        }
     </script>
 </body>
 </html>
