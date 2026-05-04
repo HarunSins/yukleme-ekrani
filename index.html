@@ -7,106 +7,107 @@
             margin: 0; padding: 0;
             background: #000 url('favela-yukleme-arkaplan.png') no-repeat center center fixed; 
             background-size: cover;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            /* Fontu senin istediğin o ince/şık tarza çektim */
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             overflow: hidden; color: white;
             display: flex; justify-content: center; align-items: center;
             height: 100vh;
         }
 
         .main-container {
-            width: 85%; max-width: 1000px; /* Barın uzunluğunu buradan kontrol edebilirsin */
+            width: 80%;
+            max-width: 900px;
             text-align: center;
-            position: relative;
-            margin-top: 150px; /* Görseldeki logoyu kapatmamak için aşağı kaydırdık */
+            /* Barı logonun tam altına hizalamak için aşağı kaydırdık */
+            margin-top: 200px; 
         }
 
-        /* Oyuncu Bilgisi */
-        .player-header {
-            display: flex; align-items: center; justify-content: center; margin-bottom: 25px;
-        }
-        #avatar {
-            width: 70px; height: 70px; border-radius: 50%;
-            border: 3px solid #ff0000; box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
-            margin-right: 20px; background-color: #111;
-        }
-        .user-text { text-align: left; }
-        #username { font-size: 26px; font-weight: bold; color: #ff0000; text-transform: uppercase; text-shadow: 3px 3px 6px #000; }
-
-        /* Dosya Durumu (Barın Üstündeki Hareketli Yazı) */
+        /* Barın üstündeki dosya durum yazısı */
         #file-status {
-            font-size: 14px; color: #ffffff; text-transform: uppercase;
-            margin-bottom: 10px; letter-spacing: 2px; font-weight: 600;
-            text-shadow: 2px 2px 4px #000;
+            font-size: 13px; 
+            color: #ffffff; 
+            text-transform: uppercase;
+            margin-bottom: 10px; 
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 3px #000;
         }
 
-        /* Uzun ve Parlayan Bar */
-        .progress-box {
-            width: 100%; height: 18px; background: rgba(0,0,0,0.85);
-            border-radius: 25px; border: 1px solid #444; overflow: hidden;
-            box-shadow: 0 0 15px rgba(0,0,0,0.7);
+        /* İstediğin o uzun ve parlayan bar tasarımı */
+        .progress-wrapper {
+            width: 100%; 
+            height: 12px; 
+            background: rgba(0,0,0,0.8);
+            border-radius: 10px; 
+            border: 1px solid #333; 
+            overflow: hidden;
         }
+
         #progress-inner {
-            width: 0%; height: 100%;
-            background: linear-gradient(90deg, #4d0000, #ff0000, #ff6666);
-            box-shadow: 0 0 25px #ff0000;
-            transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            width: 0%; /* Başlangıç sıfır */
+            height: 100%;
+            background: linear-gradient(90deg, #800000, #ff0000);
+            box-shadow: 0 0 15px #ff0000;
+            /* Akıcı dolma efekti */
+            transition: width 0.4s ease-out; 
         }
 
-        /* Alt Marka Yazısı */
-        #footer-text {
-            margin-top: 20px; font-size: 16px; font-weight: 800;
-            color: #fff; letter-spacing: 4px; text-shadow: 2px 2px 5px #000;
+        /* Alt taraftaki marka yazısı */
+        #loading-text {
+            margin-top: 15px; 
+            font-size: 14px; 
+            color: #fff; 
+            letter-spacing: 4px;
+            text-shadow: 1px 1px 4px #000;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <div class="player-header">
-            <img id="avatar" src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg">
-            <div class="user-text">
-                <div style="font-size: 12px; color: #bbb; letter-spacing: 1px;">SİSTEME GİRİŞ YAPILIYOR...</div>
-                <div id="username">OYUNCU</div>
-            </div>
-        </div>
+        <!-- Dosya durumu burada yazacak (Lua Started, Download vs.) -->
+        <div id="file-status">SUNUCUYA BAĞLANILIYOR...</div>
 
-        <div id="file-status">DOSYALAR HAZIRLANIYOR</div>
-
-        <div class="progress-box">
+        <!-- Uzun Bar -->
+        <div class="progress-wrapper">
             <div id="progress-inner"></div>
         </div>
         
-        <div id="footer-text">FAVELA-CITY ROLEPLAY</div>
+        <!-- Alt Metin -->
+        <div id="loading-text">FAVELA-CITY ROLEPLAY</div>
     </div>
 
     <script type="text/javascript">
-        // GMOD'dan gelen verileri yakalama fonksiyonları
-        var totalFiles = 0;
+        // GMOD'da barın çalışması için EN GARANTİ YÖNTEM:
+        var total = 0;
+        var needed = 0;
 
-        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-            // SteamID geldiyse konsola yaz (debug için)
-            console.log("Bağlanan ID: " + steamid);
+        // GMOD dosyaları saymaya başladığında bu çalışır
+        function SetFilesNeeded(val) {
+            needed = val;
+            total = val;
         }
 
-        function SetFilesNeeded(needed) {
-            totalFiles = Math.max(1, needed);
-        }
+        // Dosyalar indikçe bu çalışır
+        function SetFilesRemaining(val) {
+            if (total <= 0) return; // Toplam dosya gelmediyse işlem yapma
 
-        function SetFilesRemaining(remaining) {
-            // Bar dolma matematiği
-            var progress = ((totalFiles - remaining) / totalFiles) * 100;
+            var remaining = val;
+            var progress = ((total - remaining) / total) * 100;
+            
+            // Barı güncelle
             document.getElementById('progress-inner').style.width = progress + '%';
         }
 
+        // Yazıları günceller
         function SetStatusChanged(status) {
-            // Barın üstündeki Lua/Download yazılarını günceller
             document.getElementById('file-status').innerHTML = status;
         }
 
-        // Alt metin için nokta animasyonu
-        var dCount = 0;
+        // Alt metin nokta animasyonu (donma olmadığını göstermek için)
+        var dots = 0;
         setInterval(function() {
-            dCount = (dCount + 1) % 4;
-            document.getElementById('footer-text').innerHTML = "FAVELA-CITY ROLEPLAY" + ".".repeat(dCount);
+            dots = (dots + 1) % 4;
+            document.getElementById('loading-text').innerHTML = "FAVELA-CITY ROLEPLAY" + ".".repeat(dots);
         }, 600);
     </script>
 </body>
