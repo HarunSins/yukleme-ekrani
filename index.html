@@ -27,13 +27,13 @@
 
         /* 2. Katman: Oynayan GIF (Resmin üstüne biner) */
         #bg-gif {
-            background-image: url('favela-city-gif.gif'); 
+            /* URL'yi JS ile vereceğimiz için burayı boş bırakıyoruz */
             z-index: -1; 
             opacity: 0; /* Başlangıçta görünmez */
             transition: opacity 1s ease-in-out; /* 1 saniyelik yumuşak geçiş */
         }
 
-        /* Karartma Paneli (Önceki adımda ayarladığımız 0.1 - 0.5 değeri) */
+        /* Karartma Paneli */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
@@ -92,39 +92,49 @@
             document.getElementById('status').innerHTML = baseText + ".".repeat(dots);
         }, 600);
 
-        function SetStatusChanged(status) {
-            // İhtiyaç olursa burayı kullanabiliriz
-        }
+        function SetStatusChanged(status) {}
 
-        // --- GİF VE RESİM GEÇİŞ SİSTEMİ ---
+        // --- KUSURSUZ GİF VE RESİM GEÇİŞ SİSTEMİ ---
         
-        var resimSuresi = 3000; // İlk başta sabit PNG 3 saniye ekranda kalır
-        var gifSuresi = 10520;  // Senin verdiğin tam GIF süresi (10.52 saniye = 10520 ms)
-        var gecisSuresi = 1000; // CSS'teki 1 saniyelik geçiş süresinin tamamlanması için bekleme
+        var resimSuresi = 3000; // Sabit PNG 3 saniye kalsın
+        var gifSuresi = 10520;  // GIF 10.52 saniye
+        var gecisSuresi = 1000; // Kararma efekti 1 saniye
+        
+        var bgGif = document.getElementById('bg-gif');
 
-        function arkaplanDongusu() {
-            var bgGif = document.getElementById('bg-gif');
+        function gifDongusu() {
+            // HATA ÇÖZÜMÜ 1: GIF'i her seferinde zorla en baştan başlatmak için sonuna rastgele sayı ekliyoruz.
+            // Bu sayede tarayıcı GIF'i arka planda sarmak yerine hep sıfırdan oynatır.
+            var sifirla = new Date().getTime();
+            bgGif.style.backgroundImage = "url('favela-city-gif.gif?t=" + sifirla + "')";
 
-            // 1. Sabit resim süresi bitince GIF'i yavaşça ekrana getir
+            // GIF'i yumuşakça ekrana getir
+            bgGif.style.opacity = "1";
+
+            // HATA ÇÖZÜMÜ 2: GIF'in bitmesine tam 1 saniye kala kararmayı başlat (10.52 - 1 = 9.52 saniye)
+            // Bu sayede GIF tam bittiğinde ekrandan silinmiş olur ve o "tak" diye atma yaşanmaz.
+            var fadeOutZamani = gifSuresi - gecisSuresi; 
+
             setTimeout(function() {
-                bgGif.style.opacity = "1";
+                bgGif.style.opacity = "0"; // 9.52. saniyede yavaşça silinmeye başla
                 
-                // 2. GIF tamamen bitene kadar (10.52 sn) bekle, sonra GIF'i gizle
+                // Kararma tamamen bittikten sonra (1 saniye) bekle
                 setTimeout(function() {
-                    bgGif.style.opacity = "0";
                     
-                    // 3. GIF'in tamamen kaybolması için 1 saniyelik geçişi bekle, sonra döngüyü tekrarla
+                    // Artık alttaki PNG görünüyor. PNG'nin süresi (3 saniye) kadar bekle
                     setTimeout(function() {
-                        arkaplanDongusu();
-                    }, gecisSuresi);
-                    
-                }, gifSuresi); 
+                        gifDongusu(); // Sistemi baştan kusursuzca tekrar başlat
+                    }, resimSuresi);
 
-            }, resimSuresi); 
+                }, gecisSuresi);
+
+            }, fadeOutZamani);
         }
 
-        // Döngüyü başlat
-        arkaplanDongusu();
+        // Sayfa yüklendiğinde önce 3 saniye PNG'yi göster, sonra döngüyü ateşle
+        setTimeout(function() {
+            gifDongusu();
+        }, resimSuresi);
     </script>
 </body>
 </html>
