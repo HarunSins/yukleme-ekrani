@@ -17,6 +17,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover;
             background-position: center center;
+            object-fit: cover; /* Videonun ekranı tam kaplaması için */
         }
 
         /* 1. Katman: Sabit PNG (En altta durur) */
@@ -25,9 +26,8 @@
             z-index: -2; 
         }
 
-        /* 2. Katman: Oynayan GIF (Resmin üstüne biner) */
-        #bg-gif {
-            /* URL'yi JS ile vereceğimiz için burayı boş bırakıyoruz */
+        /* 2. Katman: Video (Resmin üstüne biner) */
+        #bg-video {
             z-index: -1; 
             opacity: 0; /* Başlangıçta görünmez */
             transition: opacity 1s ease-in-out; /* 1 saniyelik yumuşak geçiş */
@@ -73,7 +73,9 @@
 </head>
 <body>
     <div id="bg-static" class="bg-layer"></div>
-    <div id="bg-gif" class="bg-layer"></div>
+    
+    <!-- GİF yerine HTML5 Video Kullanıyoruz. Sessiz (muted) olması tarayıcı engellerini aşar -->
+    <video id="bg-video" class="bg-layer" src="favelacitygifdiscord.mp4" muted playsinline></video>
 
     <div class="overlay"></div>
     
@@ -94,47 +96,46 @@
 
         function SetStatusChanged(status) {}
 
-        // --- KUSURSUZ GİF VE RESİM GEÇİŞ SİSTEMİ ---
+        // --- KUSURSUZ VİDEO VE RESİM GEÇİŞ SİSTEMİ ---
         
         var resimSuresi = 3000; // Sabit PNG 3 saniye kalsın
-        var gifSuresi = 10520;  // GIF 10.52 saniye
+        var videoSuresi = 10520; // Videonun süresi (10.52 saniye)
         var gecisSuresi = 1000; // Kararma efekti 1 saniye
         
-        var bgGif = document.getElementById('bg-gif');
+        var bgVideo = document.getElementById('bg-video');
 
-        function gifDongusu() {
-            // HATA ÇÖZÜMÜ 1: GIF'i her seferinde zorla en baştan başlatmak için sonuna rastgele sayı ekliyoruz.
-            // Bu sayede tarayıcı GIF'i arka planda sarmak yerine hep sıfırdan oynatır.
-            var sifirla = new Date().getTime();
-            bgGif.style.backgroundImage = "url('favela-city-gif.gif?t=" + sifirla + "')";
+        function videoDongusu() {
+            // Videoyu tam 0. saniyeye sar ve bekleterek hazırda tut
+            bgVideo.currentTime = 0;
+            bgVideo.pause();
 
-            // GIF'i yumuşakça ekrana getir
-            bgGif.style.opacity = "1";
-
-            // HATA ÇÖZÜMÜ 2: GIF'in bitmesine tam 1 saniye kala kararmayı başlat (10.52 - 1 = 9.52 saniye)
-            // Bu sayede GIF tam bittiğinde ekrandan silinmiş olur ve o "tak" diye atma yaşanmaz.
-            var fadeOutZamani = gifSuresi - gecisSuresi; 
-
+            // 1. Sabit PNG 3 saniye kalsın
             setTimeout(function() {
-                bgGif.style.opacity = "0"; // 9.52. saniyede yavaşça silinmeye başla
                 
-                // Kararma tamamen bittikten sonra (1 saniye) bekle
+                // 2. Videoyu oynatmaya başla ve yumuşakça ekrana getir
+                bgVideo.play();
+                bgVideo.style.opacity = "1";
+
+                // 3. Videonun bitmesine 1 saniye kala kararmayı başlat (10.52 - 1 = 9.52 saniye)
+                var fadeOutZamani = videoSuresi - gecisSuresi; 
+
                 setTimeout(function() {
+                    bgVideo.style.opacity = "0"; // Yavaşça silinmeye başla
                     
-                    // Artık alttaki PNG görünüyor. PNG'nin süresi (3 saniye) kadar bekle
+                    // Kararma tamamen bittikten sonra (1 saniye) bekle
                     setTimeout(function() {
-                        gifDongusu(); // Sistemi baştan kusursuzca tekrar başlat
-                    }, resimSuresi);
+                        
+                        videoDongusu(); // Sistemi baştan kusursuzca tekrar başlat
+                        
+                    }, gecisSuresi);
 
-                }, gecisSuresi);
+                }, fadeOutZamani);
 
-            }, fadeOutZamani);
+            }, resimSuresi);
         }
 
-        // Sayfa yüklendiğinde önce 3 saniye PNG'yi göster, sonra döngüyü ateşle
-        setTimeout(function() {
-            gifDongusu();
-        }, resimSuresi);
+        // Sayfa yüklendiğinde döngüyü ateşle
+        videoDongusu();
     </script>
 </body>
 </html>
