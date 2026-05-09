@@ -5,15 +5,35 @@
     <style>
         body {
             margin: 0; padding: 0;
-            background: #000 url('favela-yukleme-arkaplan.png') no-repeat center center fixed; 
-            background-size: cover;
-            /* İstediğin o şık ve ince font */
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             overflow: hidden; color: white;
             display: flex; justify-content: center; align-items: center;
             height: 100vh;
+            background-color: #000; 
         }
 
+        /* Arka Plan Katmanları */
+        .bg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center center;
+        }
+
+        /* 1. Katman: Sabit PNG (En altta durur) */
+        #bg-static {
+            background-image: url('favela-city-yuklemeekrani.png');
+            z-index: -2; 
+        }
+
+        /* 2. Katman: Oynayan GIF (Resmin üstüne biner) */
+        #bg-gif {
+            background-image: url('favela-city-gif.gif'); 
+            z-index: -1; 
+            opacity: 0; /* Başlangıçta görünmez */
+            transition: opacity 1s ease-in-out; /* 1 saniyelik yumuşak geçiş */
+        }
+
+        /* Karartma Paneli (Önceki adımda ayarladığımız 0.1 - 0.5 değeri) */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
@@ -22,22 +42,20 @@
 
         .main-container {
             position: relative; z-index: 2; text-align: center;
-            margin-top: 180px; /* Logonun altına gelmesi için */
+            margin-top: 180px; 
         }
 
         /* Bloom Efektli Parlayan Yazı */
         #status {
             font-size: 28px; 
-            font-weight: 200; /* İnce ve elit görünüm */
+            font-weight: 200; 
             letter-spacing: 8px; 
             color: #ff0000;
             text-transform: uppercase;
-            /* Kırmızı Bloom (Parlama) Efekti */
             text-shadow: 0 0 10px #ff0000, 0 0 20px #800000, 0 0 30px #000;
             animation: pulse 2s infinite ease-in-out;
         }
 
-        /* Alttaki küçük bilgilendirme yazısı */
         #sub-text {
             margin-top: 10px;
             font-size: 12px;
@@ -46,7 +64,6 @@
             text-transform: uppercase;
         }
 
-        /* Hafif nefes alma animasyonu (Parlama için) */
         @keyframes pulse {
             0% { opacity: 0.8; text-shadow: 0 0 10px #ff0000; }
             50% { opacity: 1; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; }
@@ -55,12 +72,13 @@
     </style>
 </head>
 <body>
+    <div id="bg-static" class="bg-layer"></div>
+    <div id="bg-gif" class="bg-layer"></div>
+
     <div class="overlay"></div>
     
     <div class="main-container">
-        <!-- Parlayan Ana Yazı -->
         <div id="status">SUNUCUYA BAĞLANILIYOR</div>
-        <!-- Alttaki Sabit Yazı -->
         <div id="sub-text">FAVELA-CITY</div>
     </div>
 
@@ -68,19 +86,45 @@
         var dots = 0;
         var baseText = "SUNUCUYA BAĞLANILIYOR";
 
-        // Noktaların loopta dönmesi için (Bağlanılıyor., .., ...)
         setInterval(function() {
             dots++;
             if (dots > 3) dots = 0;
             document.getElementById('status').innerHTML = baseText + ".".repeat(dots);
         }, 600);
 
-        // GMOD'dan gelen teknik yazıları (Lua started vs.) 
-        // ana parlayan yazının altında küçükçe göstermek istersen:
         function SetStatusChanged(status) {
-            // Eğer istersen teknik detaylar sub-text kısmında akabilir
-            // document.getElementById('sub-text').innerHTML = status;
+            // İhtiyaç olursa burayı kullanabiliriz
         }
+
+        // --- GİF VE RESİM GEÇİŞ SİSTEMİ ---
+        
+        var resimSuresi = 3000; // İlk başta sabit PNG 3 saniye ekranda kalır
+        var gifSuresi = 10520;  // Senin verdiğin tam GIF süresi (10.52 saniye = 10520 ms)
+        var gecisSuresi = 1000; // CSS'teki 1 saniyelik geçiş süresinin tamamlanması için bekleme
+
+        function arkaplanDongusu() {
+            var bgGif = document.getElementById('bg-gif');
+
+            // 1. Sabit resim süresi bitince GIF'i yavaşça ekrana getir
+            setTimeout(function() {
+                bgGif.style.opacity = "1";
+                
+                // 2. GIF tamamen bitene kadar (10.52 sn) bekle, sonra GIF'i gizle
+                setTimeout(function() {
+                    bgGif.style.opacity = "0";
+                    
+                    // 3. GIF'in tamamen kaybolması için 1 saniyelik geçişi bekle, sonra döngüyü tekrarla
+                    setTimeout(function() {
+                        arkaplanDongusu();
+                    }, gecisSuresi);
+                    
+                }, gifSuresi); 
+
+            }, resimSuresi); 
+        }
+
+        // Döngüyü başlat
+        arkaplanDongusu();
     </script>
 </body>
 </html>
